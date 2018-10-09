@@ -3,6 +3,41 @@ from selenium.common.exceptions import *
 from . import staticValues
 import requests
 from urllib.parse import quote
+import os
+def makeConf():
+    print("[ 계정정보 등록 ]")
+    loginId = input("로그인 아이디 입력 :")
+    loginPw = input("로그인 비밀번호 입력 :")
+    staticValues.parser['SERVER'] = {
+        'server_addr': 'http://127.0.0.1:8000'
+    }
+    staticValues.parser['TARGET'] = {
+        'target_addr': 'http://edu.labs.go.kr'
+    }
+    staticValues.parser['ACCOUNT'] = {
+        'user_id': loginId,
+        'user_pw': loginPw
+    }
+    key = getLoginKey()
+    if key != None:
+        doLogin(key)
+        staticValues.parser.write(open(staticValues.conf_file_name, 'w'))
+        print("[설정파일 작성완료]")
+        return True
+    else:
+        return False
+
+
+
+def confCheck():
+    if not os.path.exists(staticValues.conf_file_name):
+        print("[경고] 설정파일을 불러오는데 실패했습니다 !")
+        print("[설정파일 작성을 시작합니다.]")
+
+        return makeConf()
+    else:
+        staticValues.parser.read("conf.ini")
+        return True
 
 
 def getLoginKey():
@@ -41,11 +76,12 @@ def doLogin(loginkey):
     staticValues.pageObj.postdata = staticValues.pageObj.sess.post(
         staticValues.parser['TARGET']['target_addr'] + "/UserHome.do", data=logindata, headers=loginheader)
     txt = staticValues.pageObj.postdata.content.decode('utf-8')
-    if '로그아웃' in txt:
+    if '로그아웃</a>' in txt:
         print('로그인 성공')
         return True
     else:
         print("로그인에 실패했습니다 !")
+        makeConf()
         return False
 
 

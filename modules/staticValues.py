@@ -1,6 +1,10 @@
 import configparser
+import os
+
 parser = configparser.ConfigParser()
-parser.read("conf.ini")
+conf_file_name = "conf.ini"
+
+
 
 class pageObj:
     def __init__(self):
